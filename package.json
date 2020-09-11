@@ -13,6 +13,7 @@
     "eslint-config": "^0.3.0",
     "express": "^4.17.1",
     "moment": "^2.27.0",
+    "needle": "^2.5.2",
     "wialon": "^2.0.2"
   },
   "devDependencies": {
