@@ -21,33 +21,36 @@ globalThis.PeriodType = Object.freeze({
 let config = require("./lib/config.js");
 
 app.get("/", (req, res) => {
-    let input = {
-        resourceName: "ЗАО Октябрьское"
-    };
 
-    for(let rep of config.reports) {
-        let period = getPeriodUnix(rep.periodType);
-        if(period && period.from && period.to) {
-            rep.period.from = period.from;
-            rep.period.to = period.to;
-            rep.period.name = period.name;
+    email.getRefreshToken();
 
-            input.reps.push(rep);
-        }
-    }
+    // let input = {
+    //     resourceName: "ЗАО Октябрьское"
+    // };
+
+    // for(let rep of config.reports) {
+    //     let period = getPeriodUnix(rep.periodType);
+    //     if(period && period.from && period.to) {
+    //         rep.period.from = period.from;
+    //         rep.period.to = period.to;
+    //         rep.period.name = period.name;
+
+    //         input.reps.push(rep);
+    //     }
+    // }
     
-    let reports = wialon.getReports(input);
+    // let reports = wialon.getReports(input);
 
-    let emailParams = config.email;
-    let period = getPeriod(globalThis.PeriodType.decade);
-    emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from).format("DD") + "-" + period.to;
-    email.send(emailParams, reports.decade);
+    // let emailParams = Object.assign({}, config.email);
+    // let period = getPeriod(globalThis.PeriodType.decade);
+    // emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from).format("DD") + "-" + period.to;
+    // email.send(emailParams, reports.decade);
 
-    if(reports.month) {
-        period = getPeriod(globalThis.PeriodType.month);
-        emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from).format("DD") + "-" + period.to;
-        email.send(emailParams, reports.month);
-    }
+    // if(reports.month) {
+    //     period = getPeriod(globalThis.PeriodType.month);
+    //     emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from).format("DD") + "-" + period.to;
+    //     email.send(emailParams, reports.month);
+    // }
 
     res.send("get templates");
 });
