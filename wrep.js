@@ -8,21 +8,22 @@ const port = app.get("port");
 // middleware - momentjs, date parser
 let moment = require("moment");
 
-// import { login } from "./lib/wialonRequest.js";
-let wialon = require("./lib/wialonRequest.js");
-
-let email = require("./lib/sendEmail.js");
-
+// период отчёта - декада, месяц
 globalThis.PeriodType = Object.freeze({
     decade: 0,
     month: 1
 });
 
+// import { login } from "./lib/wialonRequest.js";
+let wialon = require("./lib/wialonRequest.js");
+
+let email = require("./lib/sendEmail.js");
+
 let config = require("./lib/config.js");
 
 app.get("/", (req, res) => {
 
-    email.getRefreshToken();
+    email.send({});
 
     // let input = {
     //     resourceName: "ЗАО Октябрьское"

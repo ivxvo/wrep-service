@@ -2,3 +2,5 @@
 node_modules
 # Поместите сюда любые другие файлы, которые вы не
 # хотите вносить,такие как .DS_Store (OSX), *.bak, etc.
+config.js
+token.json
