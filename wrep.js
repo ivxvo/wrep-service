@@ -21,37 +21,39 @@ let email = require("./lib/sendEmail.js");
 
 let config = require("./lib/config.js");
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
 
-    email.send({});
+    //email.send({});
 
-    // let input = {
-    //     resourceName: "ЗАО Октябрьское"
-    // };
+    let inputWialon = {
+        resourceName: "ЗАО Октябрьское",
+        reps: []
+    };
+    //Object.assign(inputWialon.reps, config.reports);
 
-    // for(let rep of config.reports) {
-    //     let period = getPeriodUnix(rep.periodType);
-    //     if(period && period.from && period.to) {
-    //         rep.period.from = period.from;
-    //         rep.period.to = period.to;
-    //         rep.period.name = period.name;
+    for(let rep of config.reports) {
+        let period = getPeriodUnix(rep.periodType);
+        if(period && period.from && period.to) {
+            rep.period.from = period.from;
+            rep.period.to = period.to;
+            rep.period.name = period.name;
 
-    //         input.reps.push(rep);
-    //     }
-    // }
+            inputWialon.reps.push(rep);
+        }
+    }
     
-    // let reports = wialon.getReports(input);
+    let reports = await wialon.getReports(inputWialon);
 
-    // let emailParams = Object.assign({}, config.email);
-    // let period = getPeriod(globalThis.PeriodType.decade);
-    // emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from).format("DD") + "-" + period.to;
-    // email.send(emailParams, reports.decade);
+    let emailParams = Object.assign({}, config.email);
+    let period = getPeriod(globalThis.PeriodType.decade);
+    emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from, "DD.MM.YYYY").format("DD") + "-" + period.to;
+    await email.send(emailParams, reports.decade.files);
 
-    // if(reports.month) {
-    //     period = getPeriod(globalThis.PeriodType.month);
-    //     emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from).format("DD") + "-" + period.to;
-    //     email.send(emailParams, reports.month);
-    // }
+    if(reports.month) {
+        period = getPeriod(globalThis.PeriodType.month);
+        emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from, "DD.MM.YYYY").format("DD") + "-" + period.to;
+        email.send(emailParams, reports.month.files);
+    }
 
     res.send("get templates");
 });
