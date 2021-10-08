@@ -14,6 +14,12 @@ globalThis.PeriodType = Object.freeze({
     month: 1
 });
 
+// результат отправки письма
+globalThis.EmailResult = Object.freeze({
+    Success: 0,
+    Error: 1
+});
+
 // import { login } from "./lib/wialonRequest.js";
 let wialon = require("./lib/wialonRequest.js");
 
@@ -21,7 +27,7 @@ let email = require("./lib/sendEmail.js");
 
 let config = require("./lib/config.js");
 
-app.get("/", async (req, res) => {
+app.get("/", async () => {
 
     //email.send({});
 
@@ -42,20 +48,33 @@ app.get("/", async (req, res) => {
         }
     }
     
+    
     let reports = await wialon.getReports(inputWialon);
+
+    if(!reports) {
+        console.error(`reports=${reports}. Виалон не вернул ни одного отчёта.`);
+        process.exit(1);
+    }
 
     let emailParams = Object.assign({}, config.email);
     let period = getPeriod(globalThis.PeriodType.decade);
     emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from, "DD.MM.YYYY").format("DD") + "-" + period.to;
-    await email.send(emailParams, reports.decade.files);
+    let emailResult = await email.send(emailParams, reports.decade.files);
 
-    if(reports.month) {
-        period = getPeriod(globalThis.PeriodType.month);
-        emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from, "DD.MM.YYYY").format("DD") + "-" + period.to;
-        email.send(emailParams, reports.month.files);
+    if(emailResult === globalThis.EmailResult.Error)
+    {
+        process.exit(1);
     }
 
-    res.send("get templates");
+    if(reports.month.files.length > 0) {
+        period = getPeriod(globalThis.PeriodType.month);
+        emailParams.subject = period.name + " " + config.email.subject + " " + moment(period.from, "DD.MM.YYYY").format("DD") + "-" + period.to;
+        await email.send(emailParams, reports.month.files);
+    }
+    
+
+    // res.send("OK! Reports sended.");
+    process.exit(0);
 });
 
 // вычислить период выполнения отчёта в Unix-формате
@@ -75,14 +94,14 @@ function getPeriodUnix(periodType) {
             period.to = moment().set("date", 20).endOf("date").unix();
         }
         else if(today >= 1  && today < 11) {
-            period.name = moment().format("MM") + "-3";
+            period.name = moment().subtract(1, "month").format("MM") + "-3";
             period.from = moment().subtract(1, "month").set("date", 21).startOf("date").unix();
             period.to = moment().subtract(1, "month").endOf("month").unix();
         }
     }
     else if(periodType === globalThis.PeriodType.month) {
         if(today >= 1 && today < 11) {
-            period.name = moment().format("MM");
+            period.name = moment().subtract(1, "month").format("MM");
             period.from = moment().subtract(1, "month").startOf("month").unix();
             period.to = moment().subtract(1, "month").endOf("month").unix();
         }
@@ -108,14 +127,14 @@ function getPeriod(periodType) {
             period.to = moment().set("date", 20).format("DD.MM.YYYY");
         }
         else if(today >= 1  && today < 11) {
-            period.name = moment().format("MM") + "-3";
+            period.name = moment().subtract(1, "month").format("MM") + "-3";
             period.from = moment().subtract(1, "month").set("date", 21).format("DD.MM.YYYY");
             period.to = moment().subtract(1, "month").endOf("month").format("DD.MM.YYYY");
         }
     }
     else if(periodType === globalThis.PeriodType.month) {
         if(today >= 1 && today < 11) {
-            period.name = moment().format("MM");
+            period.name = moment().subtract(1, "month").format("MM");
             period.from = moment().subtract(1, "month").startOf("month").format("DD.MM.YYYY");
             period.to = moment().subtract(1, "month").endOf("month").format("DD.MM.YYYY");
         }
